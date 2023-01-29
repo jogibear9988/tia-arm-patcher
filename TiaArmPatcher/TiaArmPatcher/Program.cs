@@ -2,6 +2,7 @@
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
 
+Console.ForegroundColor = ConsoleColor.Gray;
 Console.WriteLine("TIA Portal ARM Patcher");
 Console.WriteLine();
 
@@ -18,7 +19,7 @@ foreach (var file in Directory.GetFiles(tiaPath, "*.dll"))
     try
     {
         Console.WriteLine("Process File: " + file);
-        using (var assembly = AssemblyDefinition.ReadAssembly(file, new ReaderParameters { AssemblyResolver = resolver }))
+        using (var assembly = AssemblyDefinition.ReadAssembly(file, new ReaderParameters { AssemblyResolver = resolver, ReadWrite = true }))
         {
             var module = assembly.MainModule;
 
@@ -43,9 +44,11 @@ foreach (var file in Directory.GetFiles(tiaPath, "*.dll"))
                 ilProcessor.Append(Instruction.Create(OpCodes.Br_S, i));
                 ilProcessor.Append(i);
                 ilProcessor.Append(Instruction.Create(OpCodes.Ret));
-                assembly.Write("C:\\Program Files\\Siemens\\Automation\\Portal V18\\Bin\\aa.dll");
+                assembly.Write();
                 
+                Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("--> file was patched...");
+                Console.ForegroundColor = ConsoleColor.Gray;
             }
             else
             {
@@ -57,6 +60,13 @@ foreach (var file in Directory.GetFiles(tiaPath, "*.dll"))
     {
         Console.WriteLine("--> File is not an Assembly");
     }
+    catch (IOException)
+    {
+        Console.WriteLine("--> File is not accessible, maybe this is not a problem");
+    }
 }
+
+Console.WriteLine();
+Console.WriteLine("Finished patching, press Key to exit");
 
 Console.ReadLine();
