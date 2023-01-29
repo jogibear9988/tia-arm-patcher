@@ -71,7 +71,7 @@ using (var resolver = new DefaultAssemblyResolver())
                         ilProcessor.Append(i);
                         ilProcessor.Append(Instruction.Create(OpCodes.Ret));
                     }
-                    var newFile = Path.GetFileNameWithoutExtension(file) + ".patched";
+                    var newFile = file.Substring(0, file.Length - 3) + ".patched";
                     if (File.Exists(newFile))
                         File.Delete(newFile);
                     assembly.Write(newFile);
@@ -104,8 +104,8 @@ Console.WriteLine("Patched " + patchedFiles.Count + " files");
 foreach (var file in patchedFiles)
 {
     Console.WriteLine("Patched: " + file);
-    var backupFile = Path.GetFileNameWithoutExtension(file) + ".backup";
-    var patchedFile = Path.GetFileNameWithoutExtension(file) + ".patched";
+    var backupFile =  file.Substring(0, file.Length - 3) + ".backup";
+    var patchedFile = file.Substring(0, file.Length - 3) + ".patched";
     if (File.Exists(backupFile))
     {
         File.Delete(file);
