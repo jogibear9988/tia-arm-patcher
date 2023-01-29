@@ -23,7 +23,7 @@ foreach (var file in Directory.GetFiles(tiaPath, "*.dll"))
         {
             var module = assembly.MainModule;
 
-            var assemblyIteratorType = module.GetTypes().Where(x => x.Name == "AssemblyIterator").FirstOrDefault();
+            var assemblyIteratorType = module.GetTypes().Where(x => x.Name == "AssemblyIterator" || x.Name == "InternalAssemblyIterator").FirstOrDefault();
             if (assemblyIteratorType != null)
             {
                 var method = assemblyIteratorType.GetMethods().FirstOrDefault(x => x.Name == "CheckIfSignatureOfSingleAssemblyIsValid");
