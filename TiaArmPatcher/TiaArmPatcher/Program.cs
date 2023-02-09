@@ -23,7 +23,7 @@ using (var resolver = new DefaultAssemblyResolver())
             using (var assembly = AssemblyDefinition.ReadAssembly(file, new ReaderParameters { AssemblyResolver = resolver }))
             {
                 var module = assembly.MainModule;
-
+                
                 if (module.GetTypes().Any(x => x.Name == "AssemblyIterator" || x.Name == "InternalAssemblyIterator"))
                 {
                     var assemblyIteratorType = module.GetTypes().Where(x => x.Name == "AssemblyIterator").FirstOrDefault();
@@ -82,6 +82,42 @@ using (var resolver = new DefaultAssemblyResolver())
                     Console.WriteLine("--> file was patched...");
                     Console.ForegroundColor = ConsoleColor.Gray;
                 }
+                
+                if (module.GetTypes().Any(x => x.Name == "OpenSslWrapperBio" && file.Contains("Open"))) 
+                {
+
+                    var assemblyIteratorType = module.GetTypes().Where(x => x.Name == "OpenSslWrapperBio").FirstOrDefault();
+                    var assemblyIteratorTypeCallMethod = module.GetTypes().Where(x => x.Name == "OpenSslWrapperCertBase").LastOrDefault();
+                    if (assemblyIteratorType != null)
+                    {
+                        var method = assemblyIteratorType.GetMethods().FirstOrDefault(x => x.Name == "Dispose");
+                        var methodCallMethod = assemblyIteratorTypeCallMethod.GetMethods().Last(x => x.Name.Contains("Dispose"));
+
+
+                        method.Body.ExceptionHandlers.Clear();
+                        var ilProcessor = method.Body.GetILProcessor();
+                        ilProcessor.Clear();
+                        ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
+                        ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_1));
+                        ilProcessor.Append(Instruction.Create(OpCodes.Call,methodCallMethod));
+                        ilProcessor.Append(Instruction.Create(OpCodes.Ret));
+
+
+                    }
+
+                    
+
+                    var newFile = file.Substring(0, file.Length - 3) + ".patched";
+                    if (File.Exists(newFile))
+                        File.Delete(newFile);
+                    assembly.Write(newFile);
+
+                    patchedFiles.Add(file);
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Process File: " + file);
+                    Console.WriteLine("--> file was patched...");
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                }
             }
         }
         catch (BadImageFormatException)
@@ -94,6 +130,8 @@ using (var resolver = new DefaultAssemblyResolver())
             Console.WriteLine("--> File is not accessible, this may be a problem if file is needed to be patched");
         }
     }
+
+
 }
 
 Console.WriteLine();
