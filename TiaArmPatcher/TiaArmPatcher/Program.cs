@@ -6,7 +6,31 @@ Console.ForegroundColor = ConsoleColor.Gray;
 Console.WriteLine("TIA Portal ARM Patcher");
 Console.WriteLine();
 
-var tiaPath = "C:\\Program Files\\Siemens\\Automation\\Portal V18\\Bin";
+Console.WriteLine("Choose the version to patch:");
+Console.WriteLine("1. V17");
+Console.WriteLine("2. V18");
+
+int choice;
+string input = Console.ReadLine();
+bool isValid = int.TryParse(input, out choice) && (choice == 1 || choice == 2);
+
+while (!isValid)
+{
+    Console.WriteLine("Invalid choice. Please enter 1 or 2.");
+    input = Console.ReadLine();
+    isValid = int.TryParse(input, out choice) && (choice == 1 || choice == 2);
+}
+
+string tiaPath;
+
+if (choice == 1)
+{
+    tiaPath = "C:\\Program Files\\Siemens\\Automation\\Portal V17\\Bin";
+}
+else // choice == 2
+{
+    tiaPath = "C:\\Program Files\\Siemens\\Automation\\Portal V18\\Bin";
+}
 
 Console.WriteLine("TIA Dir: " + tiaPath);
 Console.WriteLine();
